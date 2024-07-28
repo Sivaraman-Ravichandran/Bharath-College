@@ -1,8 +1,12 @@
+# Stage 1: Build
 FROM maven:3.8.5-openjdk-17 AS build
-COPY . .
-RUN mvn clean package -DskipTests
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean install -DskipTests
 
-FROM eclipse-temurin
-COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","demo.jar"]
+# Stage 2: Run
+FROM eclipse-temurin:17
+WORKDIR /app
+COPY --from=build /app/target/login-0.0.1-SNAPSHOT.jar ./app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
